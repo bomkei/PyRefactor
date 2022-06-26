@@ -6,12 +6,26 @@ class Lexer:
   # arg:
   #   src : list<string>  = source code
   def __init__(self, src: list):
-    self.source = src
+    _src = '\n'.join(src)
+
+    self.source = _src
     self.position = 0
+    self.length = len(_src)
   
+  def check(self):
+    return self.position < self.length
+
   def peek(self):
     return self.source[self.position]
 
+  def match(self, s):
+    try:
+      return self.source[self.position : self.position + len(s)] == s
+    except:
+      return False
+  
+  def pass_space(self):
+    while 
 
 # arg:
 #   arr  = the source codes read by readlines()
