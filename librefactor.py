@@ -49,17 +49,6 @@ class Lexer:
     ret = [ ]
     self.pass_space()
 
-    punctuaters = [
-      '(',
-      ')',
-      '{',
-      '}',
-      '<',
-      '>',
-      '[',
-      ']',
-    ]
-
     while self.check():
       ch = self.peek()
       pos = self.position
@@ -73,26 +62,13 @@ class Lexer:
 
       if ch.isdigit():
         while self.check() and self.peek().isdigit():
-          leng += 1
           self.position += 1
       elif ch.isalpha() or ch == '_':
         while self.check() and (self.peek().isalnum() or self.peek() == '_'):
-          leng += 1
           self.position += 1
       else:
-        found = False
-
-        for pu in punctuaters:
-          if self.match(pu):
-            tok.kind = TokenKind.TOK_PUNCTUATER
-            tok.s = pu
-            self.position += len(pu)
-            found = True
-            break
-        
-        if not found:
-          print("unknown token")
-          exit()
+        while self.check() and (not (self.peek().isalnum() self.peek() > ' ')):
+          self.position += 1
 
       if tok.s == 0:
         tok.s = self.source[pos:self.position]
