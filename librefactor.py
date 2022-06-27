@@ -1,3 +1,18 @@
+from enum import Enum
+
+class TokenKind(Enum):
+  TOK_INT = 0
+  TOK_IDENT = 1
+  TOK_PUNCTUATER = 2
+  TOK_OTHER = 3
+
+# Token
+class Token:
+  def __init__(self):
+    self.kind = TokenKind()
+    self.pos = (0, 0)
+    self.s = ''
+
 
 
 # Lexer
@@ -27,6 +42,31 @@ class Lexer:
   def pass_space(self):
     while self.check() and self.peek() <= ' ':
       self.position += 1
+
+  def run(self):
+    self.pass_space()
+
+    punctuaters = [
+      '(',
+      ')',
+      '{',
+      '}',
+      '<',
+      '>',
+      '[',
+      ']',
+    ]
+
+    while self.check():
+      ch = self.peek()
+      pos = self.position
+      tok = Token()
+
+      for pu in punctuaters:
+        if self.match(pu):
+          tok.kind = TokenKind.TOK_PUNCTUATER
+          tok.s = pu
+
 
 # arg:
 #   arr  = the source codes read by readlines()
