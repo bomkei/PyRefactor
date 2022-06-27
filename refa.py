@@ -23,13 +23,18 @@ for i in files:
 
   # Open
   with open(i, mode='r', encoding='utf-8') as f:
+    lines = f.readlines()
+
     # Reduce indents
-    retval = reduce_indent(f.readlines())
+    retval = reduce_indent(lines)
 
-    if not retval[0]:
-      break
+    if retval[0]:
+      lines = retval[1]
 
-    
+    lexer = Lexer(lines)
+    tokens = lexer.run()
+
+    print([t.s for t in tokens])
 
   # Failed to reduce indent
   if not retval[0]:
