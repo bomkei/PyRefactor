@@ -23,9 +23,10 @@ class Lexer:
       return self.source[self.position : self.position + len(s)] == s
     except:
       return False
-  
+
   def pass_space(self):
-    while 
+    while self.check() and self.peek() <= ' ':
+      self.position += 1
 
 # arg:
 #   arr  = the source codes read by readlines()
