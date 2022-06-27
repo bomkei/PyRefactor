@@ -1,3 +1,20 @@
+from asyncio.windows_events import NULL
+from enum import Enum
+
+class TokenKind(Enum):
+  TOK_DEFAULT = 0
+  TOK_INT = 1
+  TOK_IDENT = 2
+  TOK_PUNCTUATER = 3
+  TOK_OTHER = 4
+
+# Token
+class Token:
+  def __init__(self):
+    self.kind = TokenKind.TOK_DEFAULT
+    self.pos = 0
+    self.s = ''
+
 
 
 # Lexer
@@ -23,9 +40,46 @@ class Lexer:
       return self.source[self.position : self.position + len(s)] == s
     except:
       return False
-  
+
   def pass_space(self):
-    while 
+    while self.check() and self.peek() <= ' ':
+      self.position += 1
+
+  def run(self):
+    ret = [ ]
+    self.pass_space()
+
+    while self.check():
+      ch = self.peek()
+      pos = self.position
+      leng = 0
+
+      tok = Token()
+      tok.pos = self.position
+      tok.s = 0
+
+      print("1")
+
+      if ch.isdigit():
+        while self.check() and self.peek().isdigit():
+          self.position += 1
+      elif ch.isalpha() or ch == '_':
+        while self.check() and (self.peek().isalnum() or self.peek() == '_'):
+          self.position += 1
+      else:
+        while self.check() and (not (self.peek().isalnum() self.peek() > ' ')):
+          self.position += 1
+
+      if tok.s == 0:
+        tok.s = self.source[pos:self.position]
+
+      print("1")
+
+      ret.append(tok)
+      self.pass_space()
+
+    return ret
+
 
 # arg:
 #   arr  = the source codes read by readlines()
