@@ -10,7 +10,7 @@ class TokenKind(Enum):
 class Token:
   def __init__(self):
     self.kind = TokenKind()
-    self.pos = (0, 0)
+    self.pos = 0
     self.s = ''
 
 
@@ -60,12 +60,25 @@ class Lexer:
     while self.check():
       ch = self.peek()
       pos = self.position
-      tok = Token()
+      leng = 0
 
-      for pu in punctuaters:
-        if self.match(pu):
-          tok.kind = TokenKind.TOK_PUNCTUATER
-          tok.s = pu
+      tok = Token()
+      tok.pos = self.position
+
+      if ch.isdigit():
+        while self.check() and self.peek().isdigit():
+          leng += 1
+          pos += 1
+      elif ch.isalpha() or ch == '_':
+        while self.check() and self.peek().isalnum() or self.peek() == '_':
+          leng += 1
+          pos += 1
+      else:
+        for pu in punctuaters:
+          if self.match(pu):
+            tok.kind = TokenKind.TOK_PUNCTUATER
+            tok.s = pu
+            break
 
 
 # arg:
