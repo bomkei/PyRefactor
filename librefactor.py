@@ -44,7 +44,22 @@ class TokenRefactor:
   def run(self):
     i = 0
 
+    no_bracket_tree = [
+      'namespace',
+      'enum',
+      'struct',
+      'class',
+    ]
+
     while i < len(self.tokens):
       tok = self.tokens[i]
-
       
+      if tok.s in no_bracket_tree:
+        self.tokens[i + 1] = Token(' ')
+
+        if self.tokens[i + 2].kind == TokenKind.Ident:
+          self.tokens[i + 3] = Token(' ')
+      
+      i += 1
+    
+    return self.tokens

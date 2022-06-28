@@ -21,6 +21,7 @@ for i in dirs:
 
 for i in files:
   retval = 0
+  tokens = [ ]
 
   # Open
   with open(i, mode='r', encoding='utf-8') as f:
@@ -35,12 +36,12 @@ for i in files:
     lexer = Lexer(lines)
     tokens = lexer.run()
 
-    print('\n'.join([f'`{t.s}`' for t in tokens]))
+    tokrefa = TokenRefactor(tokens)
+    tokens = tokrefa.run()
 
-  # Failed to reduce indent
-  if not retval[0]:
-    continue
+    print('\n'.join([f'`{t.s}`' for t in tokens]))
 
   # Write
   with open(i, mode="w") as f:
-    f.writelines(retval[1])
+    f.write(''.join([t.s for t in tokens]))
+    #f.writelines(retval[1])

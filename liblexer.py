@@ -15,10 +15,10 @@ class TokenKind(Enum):
 
 # Token
 class Token:
-  def __init__(self):
+  def __init__(self, s = ''):
     self.kind = TokenKind.Default
     self.pos = 0
-    self.s = ''
+    self.s = s
 
 # Lexer
 class Lexer:
