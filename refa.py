@@ -25,23 +25,35 @@ for i in files:
 
   # Open
   with open(i, mode='r', encoding='utf-8') as f:
-    lines = f.readlines()
+    lines = [i.rstrip() for i in f.readlines()]
 
     # Reduce indents
-    retval = reduce_indent(lines)
+    #retval = reduce_indent(lines)
+    
+    #print(retval)
 
-    if retval[0]:
-      lines = retval[1]
+    #if retval[0]:
+    #  lines = retval[1]
 
     lexer = Lexer(lines)
     tokens = lexer.run()
 
+    ## DEBUG
+    with open('tokens.txt', mode='w', encoding='utf-8') as __dbg_out:
+      for tok in tokens:
+        ws = ''
+
+        if tok.s == '\n':
+          ws = f'`\\n`'
+        else:
+          ws = f'`{tok.s}`'
+
+        __dbg_out.write(ws + '\n')
+
     tokrefa = TokenRefactor(tokens)
     tokens = tokrefa.run()
 
-    print('\n'.join([f'`{t.s}`' for t in tokens]))
-
   # Write
-  with open(i[:i.rfind('.')] + '.new' + i[i.rfind('.'):], mode='w') as f:
+  with open(i + '.new', mode='w') as f:
     f.write(''.join([t.s for t in tokens]))
     #f.writelines(retval[1])

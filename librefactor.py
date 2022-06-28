@@ -1,41 +1,43 @@
-from argparse import ArgumentError, ArgumentTypeError
-from asyncio.windows_events import NULL
-from lib2to3.pgen2 import token
+import sys
 from liblexer import TokenKind, Token
 from enum import Enum
 
 # arg:
-#   arr  = the source codes read by readlines()
+#   lines  = the source codes read by readlines()
 #
 # return:
 #   type = tuple<bool, list<string>>
-#   first value is False if failed to reduce
-def reduce_indent(arr):
+#   first value is False if failed to reduce or already reduced
+def reduce_indent(lines: list[Token]):
   ret = [ ]
 
-  for i in arr:
+  for i in range(len(lines)):
+    line = lines[i]
     count = 0
 
-    if i == '\n':
-      ret.append(i)
+    # Empty
+    if line == '':
+      ret.append('')
       continue
 
-    if not i.startswith('    ') and i.startswith('  '):
-      return (False, [])
+    # Already reduced
+    if not line.startswith('    ') and line.startswith('  '):
+      return (False, lines)
 
-    for c in i:
+    for c in line:
       if c <= ' ':
         count += 1
       else:
         break
 
-    if count == 2:
-      bval1 = True
-      break
-    elif count == 0:
-      ret.append(i)
-    else:
-      ret.append('  ' * int(count / 4) + i[count:])
+    indent = line[:count]
+    #line = '@' * int(count / 4) + line.lstrip()
+    line = line.strip()
+
+    if ' ' in indent and '\t' in indent:
+      print(f'行 {i + 1}\t: タブ文字と空白が混在しています。')
+
+    ret.append(line)
   
   return (True, ret)
 
@@ -49,12 +51,45 @@ class TokenRefactor:
 
   def __init__(self, tokens: list):
     self.tokens = tokens
+    self.indents = [ ]
     #self.it = iter(self.tokens)
 
   # def expect(self, i: int, s: str):
   #   if self.tokens[i] != s:
   #     raise TokenRefactor.SyntaxError(f'expected {s}')
   
+  def remove_space(self, i: int) -> int:
+    while True:
+      tok = self.tokens[i]
+
+      if tok.s == '\n':
+        i += 1
+      elif tok.kind == TokenKind.Space:
+        self.tokens.pop(i)
+      else:
+        break
+    
+    return i
+
+  def pass_space(self, i: int) -> int:
+    while self.tokens[i].kind == TokenKind.Space:
+      i += 1
+    
+    return i
+
+  def get(self, i: int, pass_space = True) -> Token:
+    while True:
+      x = self.tokens[i]
+
+      if pass_space and x.kind == TokenKind.Space:
+        i += 1
+      elif x.s == '@':
+        self.tokens.pop(i)
+      else:
+        break
+    
+    return i, self.tokens[i]
+
   def read_syntax(self, i: int, synKind: SyntaxKind) -> int:
     _i = i
 
@@ -104,24 +139,28 @@ class TokenRefactor:
   def match(self, i: int, passSpace: bool, *args) -> int:
     _b = i
 
-    for arg in args:
-      if passSpace:
-        while self.tokens[i].kind == TokenKind.Space:
-          i += 1
+    print(10001)
 
-      tok = self.tokens[i]
+    for arg in args:
+      i, tok = self.get(i, False)
+
+      print(tok.s)
 
       if type(arg) == str:
-        if not tok.s == arg:
-          return -1
+        if tok.s != arg:
+          return 0
       elif type(arg) == TokenKind:
-        if not tok.kind == arg:
-          return -1
+        print(88132)
+        if tok.kind != arg:
+          print(1321)
+          print(f'{tok.kind}, {arg}')
+          return 0
       elif type(arg) == TokenRefactor.SyntaxKind:
         if self.read_syntax(i, TokenRefactor.SyntaxKind.TypeName) == 0:
-          return -1
+          return 0
       else:
-        raise ArgumentError(None, "unknown argument type")
+        print('passed unknown type argument to TokenRefactor::match()')
+        print(f'args[{args.index(arg)}]: {type(arg)}: {arg}')
       
       i += 1
     
@@ -135,52 +174,41 @@ class TokenRefactor:
       'class',
     ]
 
-    i = -1
+    i = 0
 
-    while True:
-      i += 1
-      if i >= len(self.tokens): break
-
+    while i < len(self.tokens):
       tok = self.tokens[i]
+      print(tok.s)
 
       read = 0
       bracket_count = 0
 
+      #i = self.remove_space(i)
+
+      # if tok.s == '@':
+      #   tok.s = '  '
+      #   continue
+
       if tok.s in no_bracket_tree:
-        self.tokens[i + 1] = Token(' ')
+        print(88918932)
 
-        if self.tokens[i + 2].kind == TokenKind.Ident:
-          self.tokens[i + 3] = Token(' ')
+        for s in no_bracket_tree:
+          if (read := self.match(i, False, s, TokenKind.Space, TokenKind.Ident, TokenKind.Space, '{')) > 0:
+            self.tokens[i + 1] = Token(' ')
+            self.tokens[i + 3] = Token(' ')
+            i += read
+            break
+          elif (read := self.match(i, True, s, TokenKind.Space, '{')) > 0:
+            self.tokens[i + 1] = Token(' ')
+            i += read
+            break
         
-        continue
-      
-      #
-      # コンストラクタ
-      if (read := self.match(i, True, TokenKind.Ident, '::', TokenKind.Ident, '(')) > 0:
-        i += read
-
-        while True:
-          if self.tokens[i].s == ')':
-            if bracket_count == 0:
-              break
-            
-            bracket_count -= 1
-          elif self.tokens[i].s == '(':
-            bracket_count += 1
-          
-          i += 1
-        
-        i += 1
-        
-        while self.tokens[i].s != '{':
-          self.tokens.pop(i)
-
-        self.tokens.insert(i, Token(' '))
-
+        print(self.tokens[i].s)
         continue
 
-      # 型名
-      if (read := self.read_syntax(i, TokenRefactor.SyntaxKind.TypeName)) > 0:
-        print(f'12455 {i}, {read}')
+      i += 1
+
+
+
 
     return self.tokens

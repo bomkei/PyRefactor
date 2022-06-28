@@ -1,5 +1,4 @@
 from enum import Enum
-from re import T
 
 # TokenKind
 class TokenKind(Enum):
@@ -27,49 +26,35 @@ class Lexer:
   # arg:
   #   src : list<string>  = source code
   def __init__(self, src: list):
-    #_src = '\n'.join([i.rstrip() for i in src])
-
-    #self.source = _src
-
-    tmp = [ ]
-
-    for _i in src:
-      i = _i.rstrip()
-
-      # ignore empty line
-      if i.strip() == '':
-        tmp.append('')
-        continue
-        
-
-    self.source = '\n'.join(tmp)
+    self.source = '\n'.join(src)
     self.position = 0
     self.length = len(self.source)
 
     self.punctuaters = [
-      "...",
-      ">>",
-      "<<",
-      "+=",
-      "-=",
-      "*=",
-      "/=",
-      "%=",
-      "{",
-      "}",
-      "(",
-      ")",
-      "<",
-      ">",
-      "[",
-      "]",
-      "+",
-      "-",
-      "*",
-      "/",
-      "%",
-      ",",
-      ".",
+      '...',
+      '>>',
+      '<<',
+      '+=',
+      '-=',
+      '*=',
+      '/=',
+      '%=',
+      '@',   # indent
+      '{',
+      '}',
+      '(',
+      ')',
+      '<',
+      '>',
+      '[',
+      ']',
+      '+',
+      '-',
+      '*',
+      '/',
+      '%',
+      ',',
+      '.',
     ]
   
   def check(self):
@@ -141,6 +126,8 @@ class Lexer:
           self.position += 1
 
         self.position += 2
+      elif self.peek() == '@':
+        self.position += 1
       else:
         found = False
         tok.kind = TokenKind.Punctuater
@@ -152,9 +139,9 @@ class Lexer:
             break
         
         if not found:
-          if self.peek().isspace():
+          if self.peek() <= ' ':
             tok.kind = TokenKind.Space
-            while self.check() and self.peek().isspace():
+            while self.check() and self.peek() <= ' ':
               self.position += 1
           else:
             while self.check() and (not (self.peek().isalnum() or self.peek() == '_') and self.peek() > ' '):
