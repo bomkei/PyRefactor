@@ -43,16 +43,57 @@ class TokenRefactor:
   class SyntaxKind(Enum):
     TypeName = 0
 
+  # class SyntaxError(Exception):
+  #   def __init__(self, msg: str):
+  #     super().__init__(msg)
+
   def __init__(self, tokens: list):
     self.tokens = tokens
     #self.it = iter(self.tokens)
+
+  # def expect(self, i: int, s: str):
+  #   if self.tokens[i] != s:
+  #     raise TokenRefactor.SyntaxError(f'expected {s}')
   
-  def read_syntax(synKind: SyntaxKind) -> bool:
+  def read_syntax(self, i: int, synKind: SyntaxKind) -> int:
+    # 型名
+    if synKind == TokenRefactor.SyntaxKind.TypeName:
+      while True:
+        if self.tokens[i] != TokenKind.Ident:
+          return False
+        
+        i += 1
+
+        # テンプレート
+        if self.tokens[i].s == '<':
+          i += 1 # '<'
+
+          while True:
+            read = self.read_syntax(i, TokenRefactor.SyntaxKind.TypeName):
+
+            if read == 0:
+              return False
+            
+            if self.tokens[i] == ',':
+              i += 1
+              continue
+            
+            break
+
+          if self.tokens[i] != '>':
+            return False
+
+          i += 1 # '>'
+        
+        # スコープ解決演算子
+        if 
 
 
   #
   # begin = index in self.tokens
   def match(self, begin: int, passSpace: bool, *args) -> int:
+    _b = begin
+
     for arg in args:
       res = False
 
@@ -69,13 +110,13 @@ class TokenRefactor:
         if not tok.kind == arg:
           return False
       elif type(arg) == TokenRefactor.SyntaxKind:
-        
+        if not self.
       else:
         raise ArgumentError(None, "unknown argument type")
       
       begin += 1
     
-    return True
+    return begin - _b
   
   def run(self):
     no_bracket_tree = [
