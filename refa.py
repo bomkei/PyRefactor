@@ -1,5 +1,6 @@
 import glob
 from librefactor import *
+from liblexer import *
 
 dirs = [
   "test"
@@ -34,7 +35,7 @@ for i in files:
     lexer = Lexer(lines)
     tokens = lexer.run()
 
-    print([t.s for t in tokens])
+    print('\n'.join([f'`{t.s}`' for t in tokens]))
 
   # Failed to reduce indent
   if not retval[0]:

@@ -1,85 +1,5 @@
 from asyncio.windows_events import NULL
-from enum import Enum
-
-class TokenKind(Enum):
-  TOK_DEFAULT = 0
-  TOK_INT = 1
-  TOK_IDENT = 2
-  TOK_PUNCTUATER = 3
-  TOK_OTHER = 4
-
-# Token
-class Token:
-  def __init__(self):
-    self.kind = TokenKind.TOK_DEFAULT
-    self.pos = 0
-    self.s = ''
-
-
-
-# Lexer
-class Lexer:
-  # ctor
-  # arg:
-  #   src : list<string>  = source code
-  def __init__(self, src: list):
-    _src = '\n'.join(src)
-
-    self.source = _src
-    self.position = 0
-    self.length = len(_src)
-  
-  def check(self):
-    return self.position < self.length
-
-  def peek(self):
-    return self.source[self.position]
-
-  def match(self, s):
-    try:
-      return self.source[self.position : self.position + len(s)] == s
-    except:
-      return False
-
-  def pass_space(self):
-    while self.check() and self.peek() <= ' ':
-      self.position += 1
-
-  def run(self):
-    ret = [ ]
-    self.pass_space()
-
-    while self.check():
-      ch = self.peek()
-      pos = self.position
-      leng = 0
-
-      tok = Token()
-      tok.pos = self.position
-      tok.s = 0
-
-      print("1")
-
-      if ch.isdigit():
-        while self.check() and self.peek().isdigit():
-          self.position += 1
-      elif ch.isalpha() or ch == '_':
-        while self.check() and (self.peek().isalnum() or self.peek() == '_'):
-          self.position += 1
-      else:
-        while self.check() and (not (self.peek().isalnum() self.peek() > ' ')):
-          self.position += 1
-
-      if tok.s == 0:
-        tok.s = self.source[pos:self.position]
-
-      print("1")
-
-      ret.append(tok)
-      self.pass_space()
-
-    return ret
-
+from liblexer import TokenKind, Token
 
 # arg:
 #   arr  = the source codes read by readlines()
@@ -117,3 +37,14 @@ def reduce_indent(arr):
   return (True, ret)
 
 
+class TokenRefactor:
+  def __init__(self, tokens: list):
+    self.tokens = tokens
+  
+  def run(self):
+    i = 0
+
+    while i < len(self.tokens):
+      tok = self.tokens[i]
+
+      
