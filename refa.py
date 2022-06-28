@@ -42,6 +42,6 @@ for i in files:
     print('\n'.join([f'`{t.s}`' for t in tokens]))
 
   # Write
-  with open(i, mode="w") as f:
-    f.write(''.join([t.s for t in tokens]))
+  #with open(i, mode="w") as f:
+    #f.write(''.join([t.s for t in tokens]))
     #f.writelines(retval[1])
