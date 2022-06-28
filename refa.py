@@ -3,14 +3,14 @@ from librefactor import *
 from liblexer import *
 
 dirs = [
-  "test"
+  'test'
 ]
 
 exts = [
-  ".cpp",
-  ".hpp",
-  ".c",
-  ".h"
+  '.cpp',
+  '.hpp',
+  '.c',
+  '.h'
 ]
 
 files = [ ]
@@ -42,6 +42,6 @@ for i in files:
     print('\n'.join([f'`{t.s}`' for t in tokens]))
 
   # Write
-  #with open(i, mode="w") as f:
-    #f.write(''.join([t.s for t in tokens]))
+  with open(i[:i.rfind('.')] + '.new' + i[i.rfind('.'):], mode='w') as f:
+    f.write(''.join([t.s for t in tokens]))
     #f.writelines(retval[1])

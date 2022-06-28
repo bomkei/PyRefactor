@@ -56,11 +56,13 @@ class TokenRefactor:
   #     raise TokenRefactor.SyntaxError(f'expected {s}')
   
   def read_syntax(self, i: int, synKind: SyntaxKind) -> int:
+    _i = i
+
     # 型名
     if synKind == TokenRefactor.SyntaxKind.TypeName:
       while True:
-        if self.tokens[i] != TokenKind.Ident:
-          return False
+        if self.tokens[i].kind != TokenKind.Ident:
+          return 0
         
         i += 1
 
@@ -69,54 +71,61 @@ class TokenRefactor:
           i += 1 # '<'
 
           while True:
-            read = self.read_syntax(i, TokenRefactor.SyntaxKind.TypeName):
+            read = self.read_syntax(i, TokenRefactor.SyntaxKind.TypeName)
 
             if read == 0:
-              return False
+              return 0
             
-            if self.tokens[i] == ',':
+            i += read
+            
+            if self.tokens[i].s == ',':
               i += 1
               continue
             
             break
 
-          if self.tokens[i] != '>':
-            return False
+          if self.tokens[i].s != '>':
+            return 0
 
           i += 1 # '>'
         
         # スコープ解決演算子
-        if 
+        if self.tokens[i].s == '::':
+          i += 1
+          continue
+          
+        break
+      
+      return i - _i
 
 
   #
   # begin = index in self.tokens
-  def match(self, begin: int, passSpace: bool, *args) -> int:
-    _b = begin
+  def match(self, i: int, passSpace: bool, *args) -> int:
+    _b = i
 
     for arg in args:
-      res = False
-
       if passSpace:
-        while self.tokens[begin].kind == TokenKind.Space:
-          begin += 1
+        while self.tokens[i].kind == TokenKind.Space:
+          i += 1
 
-      tok = self.tokens[begin]
+      tok = self.tokens[i]
 
       if type(arg) == str:
         if not tok.s == arg:
-          return False
+          return -1
       elif type(arg) == TokenKind:
         if not tok.kind == arg:
-          return False
+          return -1
       elif type(arg) == TokenRefactor.SyntaxKind:
-        if not self.
+        if self.read_syntax(i, TokenRefactor.SyntaxKind.TypeName) == 0:
+          return -1
       else:
         raise ArgumentError(None, "unknown argument type")
       
-      begin += 1
+      i += 1
     
-    return begin - _b
+    return i - _b
   
   def run(self):
     no_bracket_tree = [
@@ -126,23 +135,52 @@ class TokenRefactor:
       'class',
     ]
 
-    i = 0
+    i = -1
 
-    while i < len(self.tokens):
+    while True:
+      i += 1
+      if i >= len(self.tokens): break
+
       tok = self.tokens[i]
+
+      read = 0
+      bracket_count = 0
 
       if tok.s in no_bracket_tree:
         self.tokens[i + 1] = Token(' ')
 
         if self.tokens[i + 2].kind == TokenKind.Ident:
           self.tokens[i + 3] = Token(' ')
+        
+        continue
       
       #
       # コンストラクタ
-      if self.match(i, True, TokenKind.Ident, '::', TokenKind.Ident, '('):
+      if (read := self.match(i, True, TokenKind.Ident, '::', TokenKind.Ident, '(')) > 0:
+        i += read
 
-        pass
+        while True:
+          if self.tokens[i].s == ')':
+            if bracket_count == 0:
+              break
+            
+            bracket_count -= 1
+          elif self.tokens[i].s == '(':
+            bracket_count += 1
+          
+          i += 1
+        
+        i += 1
+        
+        while self.tokens[i].s != '{':
+          self.tokens.pop(i)
 
-      i += 1
+        self.tokens.insert(i, Token(' '))
+
+        continue
+
+      # 型名
+      if (read := self.read_syntax(i, TokenRefactor.SyntaxKind.TypeName)) > 0:
+        print(f'12455 {i}, {read}')
 
     return self.tokens

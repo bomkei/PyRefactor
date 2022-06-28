@@ -1,4 +1,5 @@
 from enum import Enum
+from re import T
 
 # TokenKind
 class TokenKind(Enum):
@@ -26,11 +27,24 @@ class Lexer:
   # arg:
   #   src : list<string>  = source code
   def __init__(self, src: list):
-    _src = '\n'.join([i.rstrip() for i in src])
+    #_src = '\n'.join([i.rstrip() for i in src])
 
-    self.source = _src
+    #self.source = _src
+
+    tmp = [ ]
+
+    for _i in src:
+      i = _i.rstrip()
+
+      # ignore empty line
+      if i.strip() == '':
+        tmp.append('')
+        continue
+        
+
+    self.source = '\n'.join(tmp)
     self.position = 0
-    self.length = len(_src)
+    self.length = len(self.source)
 
     self.punctuaters = [
       "...",
